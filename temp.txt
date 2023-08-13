@@ -1,0 +1,16 @@
+{
+  "channel": "C123ABC456",
+  "attachments": [
+      {
+          "fallback": "Plain-text summary of the attachment.",
+          "color": "#ffc0cb",
+          "pretext": "Email receiving",
+          "title": subject,
+          "title_link": "https://api.slack.com/",
+          "text": message,
+          "footer": "Slack API",
+          "footer_icon": "https://platform.slack-edge.com/img/default_application_icon.png",
+          "ts": 123456789
+      }
+  ]
+}

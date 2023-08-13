@@ -3,6 +3,7 @@ import pyzmail
 import urllib.parse
 import json
 import os
+import time
 from logging import getLogger, INFO
 
 logger = getLogger(__name__)
@@ -38,16 +39,37 @@ def lambda_handler(event, context):
         print("============ parse ============")
         # Extract information from the email
         email = email_message
-        print('From:', email.get_address('from'))
-        print('To:', email.get_address('to'))
+        from_addr = email.get_address('from')
+        to_addr = email.get_address('to')
         subject = email.get_subject()
-        print('Subject:', subject)
         text = email.text_part.get_payload().decode(email.text_part.charset)
+        
+        print('From:', from_addr)
+        print('To:', to_addr)
+        print('Subject:', subject)
         print('Body:', text)
 
         # create put_message
-        put_message = f"*{subject}*\n```{text}```"
+        put_message = f"*{subject}* _FROM {from_addr}_\n```{text}```"
+        
+        # create put_message2
+        put_message2 = {
+            "attachments": [
+                {
+                    "fallback": "Plain-text summary of the attachment.",
+                    "color": "#ffc0cb",
+                    "pretext": "Email receiving",
+                    "title": subject,
+                    "title_link": "https://api.slack.com/",
+                    "text": text,
+                    "footer": "from " + from_addr,
+                    "footer_icon": "https://platform.slack-edge.com/img/default_application_icon.png",
+                    "ts": int(time.time())
+                }
+            ]
+        }
 
+        # push bucket
         bucket_source = s3.Bucket(bucket)
         bucket_source.put_object(ACL='private',
                                  Body=put_message,

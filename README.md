@@ -35,11 +35,14 @@ SLACK_POST_CHANNEL =
 #### <memo> deploy command
 
 ```
-zip -r lf_decodeMail.zip lambda_function_decodeMail.py
+cp lambda_function_decodeMail.py lambda_function.py
+zip -r lf_decodeMail.zip lambda_function.py
 aws lambda update-function-code --function-name web3-SES-triggered-S3-dev --zip-file fileb://lf_decodeMail.zip
 aws lambda update-function-code --function-name web3-SES-triggered-S3 --zip-file fileb://lf_decodeMail.zip
 
-zip -r lf_postSlack.zip lambda_function_postSlack.py
+
+cp lambda_function_postSlack.py lambda_function.py
+zip -r lf_postSlack.zip lambda_function.py
 aws lambda update-function-code --function-name web3-s3-triggered-slackPost-dev --zip-file fileb://lf_postSlack.zip
 aws lambda update-function-code --function-name web3-s3-triggered-slackPost --zip-file fileb://lf_postSlack.zip
 ```
