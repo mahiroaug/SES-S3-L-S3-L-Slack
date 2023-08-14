@@ -53,7 +53,7 @@ def lambda_handler(event, context):
         # create put_message
         plain = extract_plain_text(text)
         print("plain :",plain)
-        link_list = find_link(raw)
+        link_list = find_link(text)
         print("link_list :",link_list)
         
         attachments = [
@@ -61,24 +61,26 @@ def lambda_handler(event, context):
                 "color": "#37438f",
                 "title": subject,
                 "text": plain,
-                "fields": [
+                **({"fields": [
                     {
                         "title": "link " + str(index + 1), 
                         "value": link, 
                         "short": True
-                    } for index, link in enumerate(link_list)
-                ],
-                "footer": "send from " + from_addr,
+                    } for index, link in enumerate(link_list)]
+                } if link_list else {}),
+                "footer": "send from " + ",".join(from_addr),
                 "ts": int(time.time())
             }
         ]
+        
+        attachments_json = json.dumps(attachments).encode('utf-8')
 
         # push bucket
         bucket_source = s3.Bucket(bucket)
         bucket_source.put_object(ACL='private',
-                                 Body=attachments,
-                                 Key=key_output + "/" + messageid + ".txt",
-                                 ContentType='text/plain'
+                                 Body=attachments_json,
+                                 Key=key_output + "/" + messageid + ".json",
+                                 ContentType='application/json'
                                  )
         return 'end'
     

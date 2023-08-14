@@ -37,9 +37,10 @@ def lambda_handler(event, context):
 
     try:
         response = s3.get_object(Bucket=bucket, Key=key)
-        attachments = response['Body'].read().decode('utf-8')
+        attachments_data = response['Body'].read().decode('utf-8')
+        attachments_json = json.loads(attachments_data)
         print("----------- S3 object ------------")     
-        print("attachments :",attachments)
+        print("attachments :",attachments_json)
     except Exception as e:
         print('Error:', str(e))
         return {
@@ -48,11 +49,10 @@ def lambda_handler(event, context):
         }
 
     ### post slack ####################################
-    res = post_slack(slack_client,channel,attachments)
+    post_slack(slack_client,channel,attachments_json)
 
     return {
         'statusCode': 200,
-        'body': res
     }
     
 def post_slack(slack_client, channel, attachments):
