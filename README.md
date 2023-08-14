@@ -8,13 +8,8 @@ Email --> SES --> S3 --> Lambda(decodeMail) --> S3 --> Lambda(postSlack) --> Sla
 cd make_layer
 git clone git@github.com:mahiroaug/python-package-aws-lambda.git
 cd python-package-aws-lambda
-```
-
-```
-
-```
-
-```
+rm -rf .git .gitignore
+cp ../../requirements.txt ./
 docker compose build
 docker compose up
 (file.zip) download ---> upload lambda
