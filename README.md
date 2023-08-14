@@ -5,7 +5,16 @@ Email --> SES --> S3 --> Lambda(decodeMail) --> S3 --> Lambda(postSlack) --> Sla
 ## make lambda layer
 
 ```
-cd make_layer/python-package-aws-lambda
+cd make_layer
+git clone git@github.com:mahiroaug/python-package-aws-lambda.git
+cd python-package-aws-lambda
+```
+
+```
+
+```
+
+```
 docker compose build
 docker compose up
 (file.zip) download ---> upload lambda
@@ -35,13 +44,13 @@ SLACK_POST_CHANNEL =
 #### <memo> deploy command
 
 ```
-cp lambda_function_decodeMail.py lambda_function.py
+cp src/lambda_function_decodeMail.py lambda_function.py
 zip -r lf_decodeMail.zip lambda_function.py
 aws lambda update-function-code --function-name web3-SES-triggered-S3-dev --zip-file fileb://lf_decodeMail.zip
 aws lambda update-function-code --function-name web3-SES-triggered-S3 --zip-file fileb://lf_decodeMail.zip
 
 
-cp lambda_function_postSlack.py lambda_function.py
+cp src/lambda_function_postSlack.py lambda_function.py
 zip -r lf_postSlack.zip lambda_function.py
 aws lambda update-function-code --function-name web3-s3-triggered-slackPost-dev --zip-file fileb://lf_postSlack.zip
 aws lambda update-function-code --function-name web3-s3-triggered-slackPost --zip-file fileb://lf_postSlack.zip

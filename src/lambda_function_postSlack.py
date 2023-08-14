@@ -37,9 +37,9 @@ def lambda_handler(event, context):
 
     try:
         response = s3.get_object(Bucket=bucket, Key=key)
-        content = response['Body'].read().decode('utf-8')
+        attachments = response['Body'].read().decode('utf-8')
         print("----------- S3 object ------------")     
-        print("content :",content)
+        print("attachments :",attachments)
     except Exception as e:
         print('Error:', str(e))
         return {
@@ -48,20 +48,21 @@ def lambda_handler(event, context):
         }
 
     ### post slack ####################################
-    post_slack(slack_client,channel,content)
+    res = post_slack(slack_client,channel,attachments)
 
     return {
         'statusCode': 200,
-        'body': content
+        'body': res
     }
     
-def post_slack(slack_client, channel, text):
+def post_slack(slack_client, channel, attachments):
     try:
         response = slack_client.chat_postMessage(
             channel=channel,
-            text=text,
+            attachments=attachments,
             as_user=True
         )
         print("slackResponse: ", response)
+        return response
     except SlackApiError as e:
         print("Error posting message: {}".format(e))

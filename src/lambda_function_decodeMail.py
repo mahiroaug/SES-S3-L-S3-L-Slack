@@ -4,6 +4,7 @@ import urllib.parse
 import json
 import os
 import time
+from bs4 import BeautifulSoup
 from logging import getLogger, INFO
 
 logger = getLogger(__name__)
@@ -50,29 +51,32 @@ def lambda_handler(event, context):
         print('Body:', text)
 
         # create put_message
-        put_message = f"*{subject}* _FROM {from_addr}_\n```{text}```"
+        plain = extract_plain_text(text)
+        print("plain :",plain)
+        link_list = find_link(raw)
+        print("link_list :",link_list)
         
-        # create put_message2
-        put_message2 = {
-            "attachments": [
-                {
-                    "fallback": "Plain-text summary of the attachment.",
-                    "color": "#ffc0cb",
-                    "pretext": "Email receiving",
-                    "title": subject,
-                    "title_link": "https://api.slack.com/",
-                    "text": text,
-                    "footer": "from " + from_addr,
-                    "footer_icon": "https://platform.slack-edge.com/img/default_application_icon.png",
-                    "ts": int(time.time())
-                }
-            ]
-        }
+        attachments = [
+            {
+                "color": "#37438f",
+                "title": subject,
+                "text": plain,
+                "fields": [
+                    {
+                        "title": "link " + str(index + 1), 
+                        "value": link, 
+                        "short": True
+                    } for index, link in enumerate(link_list)
+                ],
+                "footer": "send from " + from_addr,
+                "ts": int(time.time())
+            }
+        ]
 
         # push bucket
         bucket_source = s3.Bucket(bucket)
         bucket_source.put_object(ACL='private',
-                                 Body=put_message,
+                                 Body=attachments,
                                  Key=key_output + "/" + messageid + ".txt",
                                  ContentType='text/plain'
                                  )
@@ -82,3 +86,27 @@ def lambda_handler(event, context):
         print(e)
         print('Error getting object {} from bucket {}.'.format(key, bucket))
         raise e
+
+
+def extract_plain_text(html):
+    after = html.replace("<br>", "\n")
+    print("replaced raw: ",after)
+    
+    soup = BeautifulSoup(after, 'html.parser')
+    
+    # タグを取り除いたプレーンテキストを抽出
+    plain_text = soup.get_text()
+    
+    return plain_text
+
+def find_link(html):
+    soup = BeautifulSoup(html, 'html.parser')
+    
+    link_list = []
+    
+    # リンク
+    links = soup.find_all('a')
+    for link in links:
+        link_list.append(link.get('href'))
+    
+    return link_list
